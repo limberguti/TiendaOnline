@@ -1,0 +1,41 @@
+.orders-page {
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.order-list {
+  list-style: none;
+  padding: 0;
+}
+
+.order-item {
+  background-color: #fff;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.order-item h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.order-item p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.order-item ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+}
+
+.order-item ul li {
+  font-size: 0.9rem;
+  color: #333;
+}

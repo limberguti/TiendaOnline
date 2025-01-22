@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+main {
+  padding: 2rem;
+}

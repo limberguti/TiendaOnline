@@ -1,0 +1,152 @@
+-- ===================================
+-- Eliminar la base de datos existente
+-- ===================================
+DROP DATABASE IF EXISTS TiendaOnline;
+
+-- ===================================
+-- Crear la base de datos
+-- ===================================
+CREATE DATABASE TiendaOnline;
+USE TiendaOnline;
+
+-- ===================================
+-- Crear la tabla de Roles
+-- ===================================
+CREATE TABLE Rol (
+    id_rol INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_rol ENUM('cliente', 'administrador') UNIQUE NOT NULL
+);
+
+-- Insertar roles
+INSERT INTO Rol (nombre_rol) VALUES 
+('cliente'),
+('administrador');
+
+-- ===================================
+-- Crear la tabla de Usuarios
+-- ===================================
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    contraseña VARCHAR(255) NOT NULL,
+    id_rol INT NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_rol) REFERENCES Rol(id_rol) ON DELETE RESTRICT
+);
+
+-- Insertar Usuarios
+INSERT INTO Usuario (nombre, email, contraseña, id_rol) VALUES
+('Juan Pérez', 'juan@example.com', 'password123', 1),  -- Cliente
+('María López', 'maria@example.com', 'securepass', 1), -- Cliente
+('Admin Store', 'admin@example.com', 'adminpass', 2);  -- Administrador
+
+-- ===================================
+-- Crear la tabla de Productos
+-- ===================================
+CREATE TABLE Producto (
+    id_producto INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10,2) NOT NULL,
+    stock INT NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insertar Productos
+INSERT INTO Producto (nombre, descripcion, precio, stock) VALUES
+('Laptop Gamer', 'Laptop con procesador Intel i7 y 16GB RAM', 1200.99, 10),
+('Smartphone', 'Teléfono inteligente con cámara de 108MP', 699.50, 20),
+('Auriculares Bluetooth', 'Auriculares inalámbricos con cancelación de ruido', 59.99, 50),
+('Monitor 27"', 'Monitor LED de 27 pulgadas Full HD', 299.99, 15);
+
+-- ===================================
+-- Crear la tabla de Carrito de Compras
+-- ===================================
+CREATE TABLE Carrito (
+    id_carrito INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    id_producto INT,
+    cantidad INT NOT NULL,
+    fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto) ON DELETE CASCADE
+);
+
+-- Insertar Productos en el Carrito
+INSERT INTO Carrito (id_usuario, id_producto, cantidad) VALUES
+(1, 1, 1),  -- Juan agregó 1 Laptop Gamer
+(1, 2, 2),  -- Juan agregó 2 Smartphones
+(2, 3, 1);  -- María agregó 1 Auricular Bluetooth
+
+-- ===================================
+-- Crear la tabla de Pedidos
+-- ===================================
+CREATE TABLE Pedido (
+    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    estado ENUM('pendiente', 'enviado', 'entregado', 'cancelado') DEFAULT 'pendiente',
+    total DECIMAL(10,2) NOT NULL,
+    fecha_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario) ON DELETE CASCADE
+);
+
+-- Insertar Pedidos
+INSERT INTO Pedido (id_usuario, estado, total) VALUES
+(1, 'pendiente', 1200.99), -- Pedido de Juan
+(2, 'enviado', 59.99); -- Pedido de María
+
+-- ===================================
+-- Crear la tabla de Detalles de Pedido
+-- ===================================
+CREATE TABLE DetallePedido (
+    id_detalle INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT,
+    id_producto INT,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED,
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto) ON DELETE CASCADE
+);
+
+-- Insertar Detalles de Pedido
+INSERT INTO DetallePedido (id_pedido, id_producto, cantidad, precio_unitario) VALUES
+(1, 1, 1, 1200.99), -- Laptop Gamer en el pedido de Juan
+(2, 3, 1, 59.99); -- Auriculares Bluetooth en el pedido de María
+
+-- ===================================
+-- Crear la tabla de Inventario
+-- ===================================
+CREATE TABLE Inventario (
+    id_inventario INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT,
+    cantidad INT NOT NULL,
+    tipo_movimiento ENUM('entrada', 'salida') NOT NULL,
+    fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto) ON DELETE CASCADE
+);
+
+-- Insertar Movimientos en Inventario
+INSERT INTO Inventario (id_producto, cantidad, tipo_movimiento) VALUES
+(1, -1, 'salida'), -- Se vendió 1 Laptop Gamer
+(3, -1, 'salida'); -- Se vendió 1 Auricular Bluetooth
+
+-- ===================================
+-- Crear la tabla de Opiniones
+-- ===================================
+CREATE TABLE Opinion (
+    id_opinion INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    id_producto INT,
+    calificacion INT CHECK (calificacion BETWEEN 1 AND 5),
+    comentario TEXT,
+    fecha_publicacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto) ON DELETE CASCADE
+);
+
+-- Insertar Opiniones
+INSERT INTO Opinion (id_usuario, id_producto, calificacion, comentario) VALUES
+(1, 1, 5, 'Increíble laptop, rendimiento excelente.'),
+(2, 3, 4, 'Buena calidad de sonido, pero la batería podría durar más.');
